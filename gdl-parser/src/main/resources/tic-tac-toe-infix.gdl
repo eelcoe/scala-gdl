@@ -1,0 +1,50 @@
+role(x)
+role(o)
+
+index(1)
+index(2)
+index(3)
+
+init(cell(1,1,b))
+init(cell(1,2,b))
+init(cell(1,3,b))
+init(cell(2,1,b))
+init(cell(2,2,b))
+init(cell(2,3,b))
+init(cell(3,1,b))
+init(cell(3,2,b))
+init(cell(3,3,b))
+init(control(x))
+
+legal(W,mark(X,Y)) :- true(cell(X,Y,b)) & true(control(W))
+legal(x,noop) :- true(control(o))
+legal(o,noop) :- true(control(x))
+
+next(cell(M,N,R)) :- does(R,mark(M,N)) & true(cell(M,N,b))
+next(cell(M,N,W)) :- true(cell(M,N,W)) & distinct(W,b)
+next(cell(M,N,b)) :- does(W,mark(J,K)) & true(cell(M,N,b)) & distinct(M,J)
+next(cell(M,N,b)) :- does(W,mark(J,K)) & true(cell(M,N,b)) & distinct(N,K)
+next(control(x)) :- true(control(o))
+next(control(o)) :- true(control(x))
+
+goal(x,100) :- line(x) & ~line(o)
+goal(x,50) :- ~line(x) & ~line(o)
+goal(x,0) :- ~line(x) & line(o)
+
+goal(o,100) :- ~line(x) & line(o)
+goal(o,50) :- ~line(x) & ~line(o)
+goal(o,0) :- line(x) & ~line(o)
+
+line(X) :- row(M,X)
+line(X) :- column(M,X)
+line(X) :- diagonal(X)
+
+row(M,X) :- true(cell(M,1,X)) & true(cell(M,2,X)) & true(cell(M,3,X))
+column(N,X) :- true(cell(1,N,X)) & true(cell(2,N,X)) & true(cell(3,N,X))
+diagonal(X) :- true(cell(1,1,X)) & true(cell(2,2,X)) & true(cell(3,3,X))
+diagonal(X) :- true(cell(1,3,X)) & true(cell(2,2,X)) & true(cell(3,1,X))
+
+terminal :- line(W)
+terminal :- ~open
+
+open :- true(cell(M,N,b))
