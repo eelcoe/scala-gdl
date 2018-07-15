@@ -37,9 +37,6 @@ object AppliedFunction {
 case class RelationConstant(name: String, arity: Int) {
   require(name.size > 0, "the name of a relation must not be empty")
 }
-object Distinct extends RelationConstant("distinct", 2) {
-  def apply(x: Term, y: Term) = AtomicSentence(this, Seq(x, y))
-}
 object Does extends RelationConstant("does", 2) {
   def apply(player: Term, move: Term) = AtomicSentence(this, Seq(player, move))
 }
@@ -70,6 +67,7 @@ sealed trait Literal extends Expression {
   def collectVariables: Set[Variable]
 }
 case class AtomicSentence(relation: RelationConstant, terms: Seq[Term]) extends Literal {
+  require(relation != Distinct, "distinct is a reserved name")
   require(relation.arity == terms.size, "the number of terms to apply the relation to must be the same as its arity")
 
   override def isGround = terms.forall(_.isGround)
@@ -90,6 +88,17 @@ case class Not(atomicSentence: AtomicSentence) extends Literal {
   override def collectVariables: Set[Variable] = atomicSentence.collectVariables
 }
 
+case class Distinct(x: Term, y: Term) extends Literal {
+  override def isGround = x.isGround && y.isGround
+  override def relation: RelationConstant = Distinct
+  override def collectVariables: Set[Variable] = Seq(x, y).flatMap {
+    case _: ObjectConstant => Seq()
+    case v: Variable => Seq(v)
+    case f: AppliedFunction => f.collectVariables
+  }.toSet
+}
+object Distinct extends RelationConstant("distinct", 2)
+
 case class Rule(head: AtomicSentence, body: Seq[Literal]) {
   require(!bodyContainsRelation(Init), "the `init` relation may only appear in the head of a rule, not in the body")
   require(!bodyContainsRelation(Next), "the `next` relation may only appear in the head of a rule, not in the body")
@@ -97,7 +106,6 @@ case class Rule(head: AtomicSentence, body: Seq[Literal]) {
   if (head.relation == Role)
     require(body.isEmpty, "the `role` relation may only appear in the head of a rule when the body is empty")
 
-  require(head.relation != Distinct, "the `distinct` relation may only appear in the body of a rule, not in the head")
   require(head.relation != Does, "the `does` relation may only appear in the body of a rule, not in the head")
   require(head.relation != True, "the `true` relation may only appear in the body of a rule, not in the head")
 
@@ -120,11 +128,13 @@ case class Rule(head: AtomicSentence, body: Seq[Literal]) {
   private def variablesInNegativeLiterals: Set[Variable] = body.flatMap {
     case _: AtomicSentence => Seq()
     case neg: Not => neg.collectVariables
+    case dis: Distinct => dis.collectVariables
   }.toSet
 
   private def variablesInPositiveLiterals: Set[Variable] = body.flatMap {
     case pos: AtomicSentence => pos.collectVariables
     case _: Not => Seq()
+    case _: Distinct => Seq()
   }.toSet
 }
 

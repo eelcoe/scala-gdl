@@ -56,6 +56,7 @@ class Restrictions(description: Description) {
   private def terms(literal: Literal) = literal match {
     case AtomicSentence(_, terms) => terms
     case Not(AtomicSentence(_, terms)) => terms
+    case Distinct(x, y) => Seq(x, y)
   }
 
   private val nonUniqueRelationMessage: PartialFunction[(String, Set[Relation]), String] = {

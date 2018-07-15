@@ -43,10 +43,10 @@ class ModelBuilder(description: Description) {
   }
 
   def applyInstances(rule: Rule): Seq[Rule] = {
-    import ModelBuilder.{ LiteralDecorator, RuleDecorator }
+    import ModelBuilder.RuleDecorator
 
     val rulesOpt = rule.body
-      .map(literal => (literal.collectVariables.headOption, literal.atomicSentence))
+      .collect({ case sentence: AtomicSentence => (sentence.collectVariables.headOption, sentence)})
       .collectFirst({ case (Some(variable), sentence) =>
         val finder = new SubstitutionFinder(variable, sentence)
         for {
@@ -57,8 +57,14 @@ class ModelBuilder(description: Description) {
       })
 
     rulesOpt.getOrElse {
-      if (rule.body.forall(literal => groundSentences.contains(literal.atomicSentence))) Seq(rule) else Seq()
+      if (rule.body.forall(isValid)) Seq(rule) else Seq()
     }
+  }
+
+  private def isValid(literal: Literal): Boolean = literal match {
+      case sentence: AtomicSentence => groundSentences.contains(sentence)
+      case _: Not => true
+      case Distinct(x, y) => x != y
   }
 }
 
@@ -108,7 +114,7 @@ class GroundSentences(keys: Iterable[AtomicSentence]) {
 }
 
 object ModelBuilder {
-  def flatten(description: Description, debug: Boolean = false): Description = {
+  def flatten(description: Description): Description = {
     val builder = new ModelBuilder(description)
     builder.build()
 
@@ -140,11 +146,7 @@ object ModelBuilder {
     def substitute(v: Variable, c: ObjectConstant): Literal = literal match {
       case sentence: AtomicSentence => sentence.substitute(v, c)
       case Not(sentence) => Not(sentence.substitute(v, c))
-    }
-
-    def atomicSentence = literal match {
-      case sentence: AtomicSentence => sentence
-      case Not(sentence) => sentence
+      case Distinct(x, y) => Distinct(x.substitute(v, c), y.substitute(v, c))
     }
   }
 

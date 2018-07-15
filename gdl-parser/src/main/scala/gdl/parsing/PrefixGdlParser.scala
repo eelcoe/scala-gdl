@@ -8,7 +8,7 @@ import scala.util.parsing.input.CharSequenceReader
 object PrefixGdlParser extends GdlParser {
   override val lexical = new SemiColonCommentLexical
   lexical.delimiters ++= Set("(", ")", "?", "<=")
-  lexical.reserved ++= Set("not")
+  lexical.reserved ++= Set("not", "distinct")
 
   private val isInteger = { s: String => !s.contains('.') }
 
@@ -31,8 +31,11 @@ object PrefixGdlParser extends GdlParser {
   private def zeroArityRelation = ident ^^ (name => AtomicSentence(RelationConstant(name, 0), Seq()))
   private def atomicSentence = appliedRelation | zeroArityRelation
   private def negatedAtomicSentence = "(" ~ "not" ~> atomicSentence <~ ")" ^^ (Not.apply)
+  private def distinct = "(" ~ "distinct" ~> term ~ term <~ ")" ^^ {
+    case x ~ y => Distinct(x, y)
+  }
 
-  def literal: Parser[Literal] = atomicSentence | negatedAtomicSentence
+  def literal: Parser[Literal] = atomicSentence | negatedAtomicSentence | distinct
 
   private def fact = atomicSentence ^^ (Rule(_, Seq()))
   private def implication = "(" ~ "<=" ~> atomicSentence ~ rep1(literal) <~ ")" ^^ {

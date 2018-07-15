@@ -80,6 +80,7 @@ class GraphBuilder(val graph: ScalaGraph) {
       literal match {
         case _: AtomicSentence => bodyRelation --- InRuleFor(false) --> headRelation
         case _: Not => bodyRelation --- InRuleFor(true) --> headRelation
+        case _: Distinct => bodyRelation --- InRuleFor(true) --> headRelation
       }
     }
 
@@ -99,6 +100,7 @@ class GraphBuilder(val graph: ScalaGraph) {
         relation
       }
       case Not(atomicSentence) => buildNode(atomicSentence)
+      case Distinct(x, y) => buildNode(AtomicSentence(Distinct, Seq(x, y)))
     }
   }
 

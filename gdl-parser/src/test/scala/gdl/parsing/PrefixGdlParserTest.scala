@@ -1,7 +1,7 @@
 package gdl.parsing
 
 import gdl.lang._
-import org.scalacheck.Prop.{AnyOperators, forAll, forAllNoShrink}
+import org.scalacheck.Prop.{AnyOperators, forAll}
 import org.scalacheck.{Arbitrary, Gen, Properties}
 import scala.util.Success
 import util.NameGenerators
@@ -62,6 +62,16 @@ class PrefixGdlParserTest extends Properties("Prefix_GDL") {
   property("negated_relations") = forAll(functions(constants)) { case (name: String, args: Seq[String]) =>
     parseAs[Literal]("(not " + makeFunctionString(name, args) + ")") ?=
       Success(Not(AtomicSentence(name, args.map(ObjectConstant.apply))))
+  }
+
+  property("distinct_constant_relations") = forAll(Gen.listOfN(2, constants)) { terms =>
+    parseAs[Literal]("(distinct " + terms.mkString(" ") + ")") ?=
+      Success(Distinct(ObjectConstant(terms(0)), ObjectConstant(terms(1))))
+  }
+
+  property("distinct_variable_relations") = forAll(Gen.listOfN(2, variables)) { terms =>
+    parseAs[Literal]("(distinct " + terms.mkString(" ") + ")") ?=
+      Success(Distinct(Variable(terms(0).substring(1)), Variable(terms(1).substring(1))))
   }
 
   property("rules_without_bodies") = forAll(functions(constants)) { case (name: String, args: Seq[String]) =>

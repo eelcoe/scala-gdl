@@ -16,8 +16,8 @@ class RestrictionsTest extends WordSpec {
   "Restrictions" should {
     "permit function constants with the same name and arity" in {
       val restrictions = new Restrictions(Description(Seq(
-        Rule(foo, Seq(AtomicSentence("true", Seq(fun1)))),
-        Rule(foo, Seq(AtomicSentence("true", Seq(fun1))))
+        Rule(foo, Seq(True(fun1))),
+        Rule(foo, Seq(True(fun1)))
       )))
       restrictions.validateUniqueNames should have size 0
     }
@@ -50,8 +50,8 @@ class RestrictionsTest extends WordSpec {
     }
     "forbid function constants with the same name but different arity" in {
       val restrictions = new Restrictions(Description(Seq(
-        Rule(foo, Seq(AtomicSentence("true", Seq(fun1)))),
-        Rule(foo, Seq(AtomicSentence("true", Seq(fun2))))
+        Rule(foo, Seq(True(fun1))),
+        Rule(foo, Seq(True(fun2)))
       )))
       restrictions.validateUniqueNames should have size 1
     }

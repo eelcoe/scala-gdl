@@ -17,7 +17,7 @@ class DependencyGraphTest extends WordSpec {
     }
     "de-duplicate functions" in {
       val graph = new DependencyGraph(Description(Seq(Rule(AtomicSentence("foo", Seq(fun, fun)), Seq()))))
-      graph.relations should have size 1
+      graph.functions should have size 1
     }
     "detect cycles of length 1" in {
       val graph = new DependencyGraph(Description(Seq(Rule(foo, Seq(foo)))))

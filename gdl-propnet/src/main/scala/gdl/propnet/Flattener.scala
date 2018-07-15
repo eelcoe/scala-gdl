@@ -39,6 +39,7 @@ object Flattener {
     case AppliedFunction(_, terms) => terms.toList.flatMap(getConstantAndVariableList)
     case AtomicSentence(_, terms) => terms.toList.flatMap(getConstantAndVariableList)
     case Not(AtomicSentence(_, terms)) => terms.toList.flatMap(getConstantAndVariableList)
+    case Distinct(x, y) => List(x, y).flatMap(getConstantAndVariableList)
   }
 
   private def getConstantList(expression: Expression): Try[List[ObjectConstant]] = expression match {
@@ -47,6 +48,7 @@ object Flattener {
     case AppliedFunction(_, terms) => flattenTryList(terms.toList.map(getConstantList))
     case AtomicSentence(_, terms) => flattenTryList(terms.toList.map(getConstantList))
     case Not(AtomicSentence(_, terms)) => flattenTryList(terms.toList.map(getConstantList))
+    case Distinct(x, y) => flattenTryList(List(x, y).map(getConstantList))
   }
 
   private def flattenTryList[T](lists: List[Try[List[T]]]): Try[List[T]] =
@@ -197,6 +199,7 @@ object Flattener {
     private def replaceLiteral(literal: Literal): Literal = literal match {
       case AtomicSentence(relation, terms) => AtomicSentence(relation, terms.map(replaceTerm))
       case Not(sentence) => Not(replaceSentence(sentence))
+      case Distinct(x, y) => Distinct(replaceTerm(x), replaceTerm(y))
     }
 
     private def replaceTerm(term: Term): Term = term match {

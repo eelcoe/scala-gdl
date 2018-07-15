@@ -17,8 +17,8 @@ class RequirementsTest extends Properties("Valid_GDL") {
     Rule(AtomicSentence("next", Seq(function)), Seq())
     true
   }
-  property("distinct_in_body_permitted") = forAll(Gen.listOfN(2, variables)) { twoVariables: Seq[Variable] =>
-    Rule(AtomicSentence("foo"), Seq(AtomicSentence("distinct", twoVariables)))
+  property("distinct_in_body_permitted") = forAll(constants, constants) { (constant1: ObjectConstant, constant2: ObjectConstant) =>
+    Rule(AtomicSentence("foo"), Seq(Distinct(constant1, constant2)))
     true
   }
   property("does_in_body_permitted") = forAll(functions(constants)) { function: AppliedFunction =>
@@ -49,14 +49,18 @@ class RequirementsTest extends Properties("Valid_GDL") {
     Rule(AtomicSentence("foo"), Seq(atomicSentence, Not(atomicSentence)))
     true
   }
+  property("safety_for_distinct_literals") = forAll(constants, variables) { (constant: ObjectConstant, variable: Variable) =>
+    Rule(AtomicSentence("foo"), Seq(AtomicSentence("bar", Seq(variable)), Distinct(constant, variable)))
+    true
+  }
+  property("distinct_as_atomic_sentence_forbidden") = forAll(constants, constants) { (constant1: ObjectConstant, constant2: ObjectConstant) =>
+    requirementViolated(AtomicSentence("distinct", Seq(constant1, constant2)))
+  }
   property("init_in_body_forbidden") = forAll(functions(constants)) { function: AppliedFunction =>
     requirementViolated(Rule(AtomicSentence("foo"), Seq(AtomicSentence("init", Seq(function)))))
   }
   property("next_in_body_forbidden") = forAll(functions(constants)) { function: AppliedFunction =>
     requirementViolated(Rule(AtomicSentence("foo"), Seq(AtomicSentence("next", Seq(function)))))
-  }
-  property("distinct_in_head_forbidden") = forAll(Gen.listOfN(2, constants)) { twoConstants: Seq[ObjectConstant] =>
-    requirementViolated(Rule(AtomicSentence("distinct", twoConstants), Seq()))
   }
   property("does_in_head_forbidden") = forAll(functions(constants)) { function: AppliedFunction =>
     requirementViolated(Rule(AtomicSentence("does", Seq(ObjectConstant("player"), function)), Seq()))
@@ -78,5 +82,8 @@ class RequirementsTest extends Properties("Valid_GDL") {
   }
   property("safety_violated_by_function_in_head") = forAll(atomicSentences(functions(variables))) { atomicSentence: AtomicSentence =>
     (!atomicSentence.isGround) ==> requirementViolated(Rule(atomicSentence, Seq()))
+  }
+  property("safety_violated_by_distinct") = forAll(constants, variables) { (constant: ObjectConstant, variable: Variable) =>
+    requirementViolated(Rule(AtomicSentence("foo"), Seq(Distinct(constant, variable))))
   }
 }

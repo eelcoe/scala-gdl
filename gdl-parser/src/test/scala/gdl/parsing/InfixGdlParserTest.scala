@@ -68,6 +68,16 @@ class InfixGdlParserTest extends Properties("Infix_GDL") {
       Success(Not(AtomicSentence(name, args.map(ObjectConstant.apply))))
   }
 
+  property("distinct_with_constant_arguments") = forAll(Gen.listOfN(2, constants)) { terms =>
+    parseAs[Literal](makeFunctionString("distinct", terms)) ?=
+      Success(Distinct(ObjectConstant(terms(0)), ObjectConstant(terms(1))))
+  }
+
+  property("distinct_with_variable_relations") = forAll(Gen.listOfN(2, variables)) { terms =>
+    parseAs[Literal](makeFunctionString("distinct", terms)) ?=
+      Success(Distinct(Variable(terms(0)), Variable(terms(1))))
+  }
+
   property("rules_without_bodies") = forAll(functions(constants)) { case (name: String, args: Seq[String]) =>
     parseAs[Rule](makeFunctionString(name, args)) ?=
       Success(Rule(AtomicSentence(name, args.map(ObjectConstant.apply)), Seq()))
