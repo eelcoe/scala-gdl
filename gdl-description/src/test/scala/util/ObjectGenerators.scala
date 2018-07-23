@@ -3,9 +3,9 @@ package util
 import gdl.lang._
 import org.scalacheck.Gen
 
-import scala.collection.convert.ImplicitConversions._
-
 object ObjectGenerators {
+  import CustomGenerators._
+
   def constants = NameGenerators.constants.map(ObjectConstant.apply)
 
   def variables = Gen.identifier.map(Variable.apply)
@@ -85,19 +85,4 @@ object ObjectGenerators {
     vars <- varsGen
     args <- Gen.sequence[List[Term], Term](vars.map(termsContaining(_, recursionLevel + 1))).label("function_arguments")
   } yield AppliedFunction(name, args)
-
-  // generates a list of n subsets so that the total union is equal to the original set, or the empty set if n = 0
-  private def listOfNSubsets[T](n: Int, set: Set[T]): Gen[List[Set[T]]] =
-    if (n == 0 || set.isEmpty) Gen.const(List.fill(n)(Set.empty))
-    else {
-      val allocationsGens = set.map(elem => for (i <- Gen.choose(1, n)) yield (i, elem))
-      for {
-        allocations <- Gen.sequence(allocationsGens)
-      } yield {
-        val subsets = asMapToSet(allocations)
-        (1 to n).map(i => subsets.getOrElse(i, Set.empty))
-      }.toList
-    }
-
-  private def asMapToSet[K, V](seq: Seq[(K, V)]): Map[K, Set[V]] = seq.groupBy(_._1).mapValues(_.map(_._2).toSet)
 }
