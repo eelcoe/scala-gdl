@@ -1,9 +1,9 @@
 package gdl.parsing
 
 import gdl.lang._
+import gdl.parsing.parser.{GdlParser, SemiColonCommentLexical}
 
-import scala.util.parsing.combinator.syntactical.StandardTokenParsers
-import scala.util.parsing.input.CharSequenceReader
+import scala.util.Try
 
 object PrefixGdlParser extends GdlParser {
   override val lexical = new SemiColonCommentLexical
@@ -43,5 +43,7 @@ object PrefixGdlParser extends GdlParser {
   }
   def rule: Parser[Rule] = fact | implication
 
-  override def description: Parser[Description] = rule.* ^^ (Description.apply)
+  def description: Parser[Description] = rule.* ^^ (Description.apply)
+
+  def apply(text: String): Try[Description] = parseAs(text)(description)
 }

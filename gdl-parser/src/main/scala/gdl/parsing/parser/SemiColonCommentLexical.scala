@@ -1,4 +1,4 @@
-package gdl.parsing
+package gdl.parsing.parser
 
 import scala.util.parsing.combinator.lexical.StdLexical
 import scala.util.parsing.input.CharArrayReader.EofCh

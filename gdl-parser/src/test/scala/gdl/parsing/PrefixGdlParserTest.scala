@@ -30,16 +30,16 @@ class PrefixGdlParserTest extends Properties("Prefix_GDL") {
   }
 
   property("functions_with_constant_arguments") = forAll(functions(constants)) { case (name: String, args: Seq[String]) =>
-    parseAs[Term](makeFunctionString(name, args)) ?= Success(AppliedFunction(name, args.map(ObjectConstant.apply)))
+    parseAs[Term](makeFunctionString(name, args)) ?= Success(AppliedFunction(name, args.map(ObjectConstant)))
   }
 
   property("functions_with_variable_arguments") = forAll(functions(variables)) { case (name: String, args: Seq[String]) =>
-    parseAs[Term](makeFunctionString(name, args)) ?= Success(AppliedFunction(name, args.map(_.substring(1)).map(Variable.apply)))
+    parseAs[Term](makeFunctionString(name, args)) ?= Success(AppliedFunction(name, args.map(_.substring(1)).map(Variable)))
   }
 
   property("nested_functions") = forAll(nestedFunctions) { case (name: String, args: Seq[(String, Seq[String])]) =>
     parseAs[Term](makeFunctionString(name, args.map(makeFunctionString.tupled))) ?=
-      Success(AppliedFunction(name, args.map(makeFunctionObject(ObjectConstant.apply).tupled)))
+      Success(AppliedFunction(name, args.map(makeFunctionObject(ObjectConstant).tupled)))
   }
 
   property("relation_with_zero_arity") = forAll(Gen.identifier) { name: String =>
@@ -47,21 +47,21 @@ class PrefixGdlParserTest extends Properties("Prefix_GDL") {
   }
 
   property("relations_with_constant_arguments") = forAll(functions(constants)) { case (name: String, args: Seq[String]) =>
-    parseAs[Literal](makeFunctionString(name, args)) ?= Success(AtomicSentence(name, args.map(ObjectConstant.apply)))
+    parseAs[Literal](makeFunctionString(name, args)) ?= Success(AtomicSentence(name, args.map(ObjectConstant)))
   }
 
   property("relations_with_variable_arguments") = forAll(functions(variables)) { case (name: String, args: Seq[String]) =>
-    parseAs[Literal](makeFunctionString(name, args)) ?= Success(AtomicSentence(name, args.map(_.substring(1)).map(Variable.apply)))
+    parseAs[Literal](makeFunctionString(name, args)) ?= Success(AtomicSentence(name, args.map(_.substring(1)).map(Variable)))
   }
 
   property("relations_with_function_arguments") = forAll(nestedFunctions) { case (name: String, args: Seq[(String, Seq[String])]) =>
     parseAs[Literal](makeFunctionString(name, args.map(makeFunctionString.tupled))) ?=
-      Success(AtomicSentence(name, args.map(makeFunctionObject(ObjectConstant.apply).tupled)))
+      Success(AtomicSentence(name, args.map(makeFunctionObject(ObjectConstant).tupled)))
   }
 
   property("negated_relations") = forAll(functions(constants)) { case (name: String, args: Seq[String]) =>
     parseAs[Literal]("(not " + makeFunctionString(name, args) + ")") ?=
-      Success(Not(AtomicSentence(name, args.map(ObjectConstant.apply))))
+      Success(Not(AtomicSentence(name, args.map(ObjectConstant))))
   }
 
   property("distinct_constant_relations") = forAll(Gen.listOfN(2, constants)) { terms =>
@@ -76,17 +76,17 @@ class PrefixGdlParserTest extends Properties("Prefix_GDL") {
 
   property("rules_without_bodies") = forAll(functions(constants)) { case (name: String, args: Seq[String]) =>
     parseAs[Rule](makeFunctionString(name, args)) ?=
-      Success(Rule(AtomicSentence(name, args.map(ObjectConstant.apply)), Seq()))
+      Success(Rule(AtomicSentence(name, args.map(ObjectConstant)), Seq()))
   }
 
   property("rules_with_bodies") = forAll(rules(Gen.identifier, Gen.identifier)) { case (head: String, body: Seq[String]) =>
     parseAs[Rule]("(<= " + (head +: body).mkString(" ") + ")") ?=
-      Success(Rule(AtomicSentence(head), body.map(AtomicSentence.apply)))
+      Success(Rule(AtomicSentence(head), body.map(AtomicSentence(_))))
   }
 
   property("multiple_rules") = forAll(Gen.listOf(rules(Gen.identifier, Gen.identifier))) { rules: Seq[(String, Seq[String])] =>
     PrefixGdlParser((rules.map { case (head: String, body: Seq[String]) => "(<= " + (head +: body).mkString(" ") + ")" }).mkString("\n")) ?=
-      Success(Description(rules.map { case (head: String, body: Seq[String]) => Rule(AtomicSentence(head), body.map(AtomicSentence.apply)) }))
+      Success(Description(rules.map { case (head: String, body: Seq[String]) => Rule(AtomicSentence(head), body.map(AtomicSentence(_))) }))
   }
 
   property("ignore_empty_lines_and_comments") = forAll(Gen.listOf(Gen.oneOf(Gen.const(""), comments, Gen.identifier))) { lines: Seq[String] =>

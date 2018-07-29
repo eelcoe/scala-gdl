@@ -9,7 +9,7 @@ case class Score(term: Term)
 case class Input(player: Player, move: Move) extends Node {
   private var currentState: Boolean = false
   def set(state: Boolean): Unit = currentState = state
-  override def get(): Boolean = currentState
+  def get(): Boolean = currentState
 
   val legal: Legal = Legal(player, move)
   def isLegal(): Boolean = legal.get()

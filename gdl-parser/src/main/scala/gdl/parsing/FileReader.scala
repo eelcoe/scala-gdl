@@ -1,6 +1,7 @@
 package gdl.parsing
 
-import gdl.validation.{DependencyGraph, InRuleFor, Relation, Restrictions}
+import gdl.validation.dependencyGraph.Relation
+import gdl.validation.{DependencyGraph, Restrictions}
 
 import scala.io.Source
 

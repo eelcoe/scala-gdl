@@ -8,12 +8,12 @@ sealed trait Term extends Expression
 
 case class ObjectConstant(name: String) extends Term {
   require(name.size > 0, "the name of a constant must not be empty")
-  override def isGround: Boolean = true
+  def isGround: Boolean = true
 }
 
 case class Variable(name: String) extends Term {
   require(name.size > 0, "the name of a variable must not be empty")
-  override def isGround: Boolean = false
+  def isGround: Boolean = false
 }
 
 case class FunctionConstant(name: String, arity: Int) {
@@ -22,7 +22,7 @@ case class FunctionConstant(name: String, arity: Int) {
 }
 case class AppliedFunction(function: FunctionConstant, terms: Seq[Term]) extends Term {
   require(function.arity == terms.size, "the number of terms to apply the function to must be the same as its arity")
-  override def isGround = terms.forall(_.isGround)
+  def isGround: Boolean = terms.forall(_.isGround)
 
   def collectVariables: Set[Variable] = terms.flatMap {
     case _: ObjectConstant => None
@@ -30,7 +30,7 @@ case class AppliedFunction(function: FunctionConstant, terms: Seq[Term]) extends
     case f: AppliedFunction => f.collectVariables
   }.toSet
 }
-object AppliedFunction {
+object AppliedFunction extends ((FunctionConstant, Seq[Term]) => AppliedFunction) {
   def apply(function: String, args: Seq[Term]): AppliedFunction = AppliedFunction(FunctionConstant(function, args.size), args)
 }
 
@@ -70,34 +70,33 @@ case class AtomicSentence(relation: RelationConstant, terms: Seq[Term]) extends 
   require(relation != Distinct, "distinct is a reserved name")
   require(relation.arity == terms.size, "the number of terms to apply the relation to must be the same as its arity")
 
-  override def isGround = terms.forall(_.isGround)
-  override def collectVariables: Set[Variable] = terms.flatMap {
+  def isGround: Boolean = terms.forall(_.isGround)
+  def collectVariables: Set[Variable] = terms.flatMap {
     case _: ObjectConstant => Seq()
     case v: Variable => Seq(v)
     case f: AppliedFunction => f.collectVariables
   }.toSet
 }
-object AtomicSentence {
-  def apply(relation: String): AtomicSentence = apply(relation, Seq())
-  def apply(relation: String, args: Seq[Term]): AtomicSentence =
+object AtomicSentence extends ((RelationConstant, Seq[Term]) => AtomicSentence) {
+  def apply(relation: String, args: Seq[Term] = Seq()): AtomicSentence =
     AtomicSentence(RelationConstant(relation, args.size), args)
 }
 case class Not(atomicSentence: AtomicSentence) extends Literal {
-  override def isGround = atomicSentence.isGround
-  override def relation: RelationConstant = atomicSentence.relation
-  override def collectVariables: Set[Variable] = atomicSentence.collectVariables
+  def isGround: Boolean = atomicSentence.isGround
+  def relation: RelationConstant = atomicSentence.relation
+  def collectVariables: Set[Variable] = atomicSentence.collectVariables
 }
 
 case class Distinct(x: Term, y: Term) extends Literal {
-  override def isGround = x.isGround && y.isGround
-  override def relation: RelationConstant = Distinct
-  override def collectVariables: Set[Variable] = Seq(x, y).flatMap {
+  def isGround: Boolean = x.isGround && y.isGround
+  def relation: RelationConstant = Distinct
+  def collectVariables: Set[Variable] = Seq(x, y).flatMap {
     case _: ObjectConstant => Seq()
     case v: Variable => Seq(v)
     case f: AppliedFunction => f.collectVariables
   }.toSet
 }
-object Distinct extends RelationConstant("distinct", 2)
+object Distinct extends RelationConstant("distinct", 2) with ((Term, Term) => Distinct)
 
 case class Rule(head: AtomicSentence, body: Seq[Literal]) {
   require(!bodyContainsRelation(Init), "the `init` relation may only appear in the head of a rule, not in the body")

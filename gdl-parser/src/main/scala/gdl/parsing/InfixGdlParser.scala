@@ -1,6 +1,9 @@
 package gdl.parsing
 
 import gdl.lang._
+import gdl.parsing.parser.GdlParser
+
+import scala.util.Try
 
 object InfixGdlParser extends GdlParser {
   lexical.delimiters ++= Set("(", ")", ",", "~", ":-", "&")
@@ -41,5 +44,7 @@ object InfixGdlParser extends GdlParser {
     case head ~ Some(body) => Rule(head, body)
   }
 
-  override def description: Parser[Description] = rule.* ^^ (Description.apply)
+  def description: Parser[Description] = rule.* ^^ (Description.apply)
+
+  def apply(text: String): Try[Description] = parseAs(text)(description)
 }

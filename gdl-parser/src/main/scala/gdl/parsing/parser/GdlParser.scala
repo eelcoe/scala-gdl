@@ -1,4 +1,4 @@
-package gdl.parsing
+package gdl.parsing.parser
 
 import gdl.lang.Description
 
@@ -7,8 +7,7 @@ import scala.util.parsing.combinator.syntactical.StandardTokenParsers
 import scala.util.parsing.input.CharSequenceReader
 
 trait GdlParser extends StandardTokenParsers {
-  implicit def description: Parser[Description]
-  def apply(text: String): Try[Description] = parseAs[Description](text)
+  def apply(text: String): Try[Description]
 
   def parseAs[T](description: String)(implicit parser: Parser[T]): Try[T] = {
     val tokenReader = new lexical.Scanner(new CharSequenceReader(description))

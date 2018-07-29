@@ -1,6 +1,7 @@
 package gdl.validation
 
 import gdl.lang._
+import gdl.validation.dependencyGraph.{Function, InRuleFor, Relation}
 
 class Restrictions(description: Description) {
   val dependencyGraph = new DependencyGraph(description)
