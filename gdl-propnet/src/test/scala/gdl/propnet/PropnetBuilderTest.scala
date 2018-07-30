@@ -71,8 +71,8 @@ class PropnetBuilderTest extends Properties("Build_propnet") {
     val propnet = build(
       True(ObjectConstant("c"))
     )(
-      Rule(Init(ObjectConstant("c")), Seq())
-    )
+        Rule(Init(ObjectConstant("c")), Seq())
+      )
 
     propnet.init()
     for (_ <- 1 to n) propnet.update()
@@ -84,8 +84,8 @@ class PropnetBuilderTest extends Properties("Build_propnet") {
     val propnet = build(
       True(ObjectConstant("c"))
     )(
-      Rule(Next(ObjectConstant("c")), Seq())
-    )
+        Rule(Next(ObjectConstant("c")), Seq())
+      )
 
     propnet.init()
     for (_ <- 1 to n) propnet.update()
@@ -97,9 +97,9 @@ class PropnetBuilderTest extends Properties("Build_propnet") {
     val propnet = build(
       True(ObjectConstant("c"))
     )(
-      Rule(Init(ObjectConstant("c")), Seq()),
-      Rule(Next(ObjectConstant("c")), Seq(True(ObjectConstant("c"))))
-    )
+        Rule(Init(ObjectConstant("c")), Seq()),
+        Rule(Next(ObjectConstant("c")), Seq(True(ObjectConstant("c"))))
+      )
 
     propnet.init()
     for (_ <- 1 to n) propnet.update()
@@ -111,8 +111,8 @@ class PropnetBuilderTest extends Properties("Build_propnet") {
     val propnet = build(
       True(ObjectConstant("c"))
     )(
-      Rule(Next(ObjectConstant("c")), Seq(True(ObjectConstant("c"))))
-    )
+        Rule(Next(ObjectConstant("c")), Seq(True(ObjectConstant("c"))))
+      )
 
     propnet.init()
     for (_ <- 1 to n) propnet.update()
@@ -126,10 +126,10 @@ class PropnetBuilderTest extends Properties("Build_propnet") {
       True(ObjectConstant("c")),
       view
     )(
-      Rule(Init(ObjectConstant("c")), Seq()),
-      Rule(view, Seq(True(ObjectConstant("c")))),
-      Rule(Next(ObjectConstant("c")), Seq(view))
-    )
+        Rule(Init(ObjectConstant("c")), Seq()),
+        Rule(view, Seq(True(ObjectConstant("c")))),
+        Rule(Next(ObjectConstant("c")), Seq(view))
+      )
 
     propnet.init()
     for (_ <- 1 to n) propnet.update()
@@ -159,8 +159,7 @@ class PropnetBuilderTest extends Properties("Build_propnet") {
 
   property("period_multiplication") = forAll(Gen.posNum[Int], Gen.posNum[Int], nonNegNum) { (l, m, n) =>
     val model = (for (i <- 0 until l) yield True(state("s", i))) ++ (for (i <- 0 until m) yield True(state("t", i)))
-    val rules =
-      (for (i <- 0 until l) yield Rule(Next(state("s", (i + 1) % l)), Seq(True(state("s", i))))) ++
+    val rules = (for (i <- 0 until l) yield Rule(Next(state("s", (i + 1) % l)), Seq(True(state("s", i))))) ++
       (for (j <- 0 until m) yield Rule(Next(state("t", j)), Seq(Not(True(state("s", l - 1))), True(state("t", j))))) ++
       (for (j <- 0 until m) yield Rule(Next(state("t", (j + 1) % m)), Seq(True(state("s", l - 1)), True(state("t", j)))))
 
@@ -182,8 +181,7 @@ class PropnetBuilderTest extends Properties("Build_propnet") {
     val toggle = ObjectConstant("toggle")
 
     val model = for (i <- 0 until n) yield True(state("s", i))
-    val rules =
-      (for (i <- 0 until n) yield Rule(Next(state("s", i)), Seq(Does(player, noop), True(state("s", i))))) ++
+    val rules = (for (i <- 0 until n) yield Rule(Next(state("s", i)), Seq(Does(player, noop), True(state("s", i))))) ++
       (for (i <- 0 until n) yield Rule(Next(state("s", (i + 1) % n)), Seq(Does(player, toggle), True(state("s", i)))))
 
     val propnet = buildPropnet(

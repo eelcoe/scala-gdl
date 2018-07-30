@@ -6,7 +6,6 @@ import gdl.lang._
 import gremlin.scala.{id, label}
 import org.apache.commons.lang.SerializationUtils
 
-
 trait WithNameUuid {
   protected def createUUIDNotForCaseClassExtensions(source: Serializable) = UUID.nameUUIDFromBytes(SerializationUtils.serialize(source))
   protected def createUUID(source: Object) = UUID.nameUUIDFromBytes(source.toString.getBytes)

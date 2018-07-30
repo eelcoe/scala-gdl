@@ -46,7 +46,7 @@ class ModelBuilder(description: Description) {
     import ModelBuilder.RuleDecorator
 
     val rulesOpt = rule.body
-      .collect({ case sentence: AtomicSentence => (sentence.collectVariables.headOption, sentence)})
+      .collect({ case sentence: AtomicSentence => (sentence.collectVariables.headOption, sentence) })
       .collectFirst({ case (Some(variable), sentence) =>
         val finder = new SubstitutionFinder(variable, sentence)
         for {
@@ -62,9 +62,9 @@ class ModelBuilder(description: Description) {
   }
 
   private def isValid(literal: Literal): Boolean = literal match {
-      case sentence: AtomicSentence => groundSentences.contains(sentence)
-      case _: Not => true
-      case Distinct(x, y) => x != y
+    case sentence: AtomicSentence => groundSentences.contains(sentence)
+    case _: Not => true
+    case Distinct(x, y) => x != y
   }
 }
 

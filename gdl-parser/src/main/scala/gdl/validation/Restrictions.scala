@@ -45,12 +45,12 @@ class Restrictions(description: Description) {
   def stratify: Either[Set[String], Map[Int, Set[Rule]]] = {
     val validationMessages = validateUniqueNames union validateStratification union validateKeywords union validateRecursion
     if (validationMessages.nonEmpty) Left(validationMessages)
-    else Right(dependencyGraph.strata.mapValues(_.map(_.toRelationConstant)flatMap(getRulesByHeadRelation)))
+    else Right(dependencyGraph.strata.mapValues(_.map(_.toRelationConstant) flatMap (getRulesByHeadRelation)))
   }
 
   private def getRulesByHeadRelation(relation: RelationConstant) = description.rules.filter(_.head.relation == relation)
 
-  private def pathContains(relations: RelationConstant*) = { path: List[(Relation, InRuleFor, Relation)]  =>
+  private def pathContains(relations: RelationConstant*) = { path: List[(Relation, InRuleFor, Relation)] =>
     relations.toSet subsetOf path.map(_._1.toRelationConstant).toSet
   }
 
@@ -81,7 +81,7 @@ class Restrictions(description: Description) {
 
   private def pathToString(path: List[(Relation, InRuleFor, Relation)]) = {
     path.flatMap { segment =>
-      List(segment._1.toRelationConstant.toString, if(segment._2.negative) "~>" else "->")
+      List(segment._1.toRelationConstant.toString, if (segment._2.negative) "~>" else "->")
     } :+ path.last._3.toRelationConstant.toString
   }.mkString(" ")
 }

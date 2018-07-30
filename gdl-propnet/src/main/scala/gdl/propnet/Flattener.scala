@@ -76,7 +76,8 @@ object Flattener {
         }
 
         dom.assignments.add(instantiation)
-      } else {
+      }
+      else {
         val productionTemplate = getConstantAndVariableList(head)
         val conditions = rule.body.collect {
           case sentence: AtomicSentence => Condition(findGenericForm(sentence), getConstantAndVariableList(sentence))
@@ -133,10 +134,12 @@ object Flattener {
 
       if (staticAssignment.size == ruleReference.productionTemplate.size) {
         Set(staticAssignment)
-      } else {
+      }
+      else {
         Set()
       }
-    } else {
+    }
+    else {
       instantiations.map { instantiation =>
         ruleReference.productionTemplate.collect {
           case objectConstant: ObjectConstant => objectConstant
